@@ -28,12 +28,12 @@ commands:
           when: on_fail
           command: |
             # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-            SUCCESS = curl https://kvdb.io/FsGnCAbkTAfD27QTDD1KgX/migration_${workflow_id}
+            export SUCCESS = curl https://kvdb.io/FsGnCAbkTAfD27QTDD1KgX/migration_${workflow_id}
             if(( $SUCCESS==1 )); 
             then
              cd ~/project/backend
              npm install
-             npm revert migration
+             npm run migrations:revert
             fi
             
 jobs:
@@ -177,10 +177,21 @@ jobs:
             --filters "Name=tag:project,Values=udapeople" \
             --output text >> ./.circleci/ansible/inventory.txt
             cat ./.circleci/ansible/inventory.txt
+
+      - run:
+          name: Add back-end ip to IP file
+          command: |
+            aws ec2 describe-instances \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --filters "Name=tag:project,Values=udapeople-backend" \
+            --output text > ./.circleci/ansible/IP.txt
+            cat ./.circleci/ansible/IP.txt
+
       - persist_to_workspace:
-          root: ~/
+          root: .circleci/ansible/
           paths:
-            - project/.circleci/ansible/inventory.txt
+            - inventory.txt
+            - IP.txt
       - destroy-environment:
           workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"    
 
@@ -215,7 +226,7 @@ jobs:
       # Checkout code from git
       - checkout
       - restore_cache:
-          key: "backend-build"
+          key: "backend-scan"
       - run:
           name: Run migrations
           command: |
