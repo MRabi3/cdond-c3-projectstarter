@@ -291,8 +291,10 @@ jobs:
             npm install
             npm run build
             aws s3 cp ./dist s3://udapeople-"${CIRCLE_WORKFLOW_ID:0:7}" --recursive
-      - revert-migrations
-      - destroy-environment
+      - revert-migrations:
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
+      - destroy-environment:
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
       # Here's where you will add some code to rollback on failure      
                     
   deploy-backend:
@@ -332,8 +334,10 @@ jobs:
           command: |
             cd ./.circleci/ansible
             ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory.txt deploy-backend.yml
-      - revert-migrations
-      - destroy-environment 
+      - revert-migrations:
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
+      - destroy-environment:
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
 
 
   smoke-test:
@@ -368,8 +372,10 @@ jobs:
             else
               return 0
             fi
-      - revert-migrations
-      - destroy-environment   
+      - revert-migrations:
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
+      - destroy-environment:
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
 
   cloudfront-update:
     docker:
@@ -413,8 +419,10 @@ jobs:
           root: .circleci/ansible/
           paths:
             - originalWorkflowID.txt
-      - revert-migrations
-      - destroy-environment 
+      - revert-migrations:
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
+      - destroy-environment:
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
   cleanup:
     docker:
       - image: amazon/aws-cli
@@ -441,8 +449,10 @@ jobs:
             else
               echo "No old workflow exists"
             fi 
-      - revert-migrations
-      - destroy-environment
+      - revert-migrations:
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
+      - destroy-environment:
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
             
 
 workflows:
