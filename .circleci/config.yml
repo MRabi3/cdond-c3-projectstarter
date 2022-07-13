@@ -431,7 +431,7 @@ jobs:
             aws cloudformation $StackOption \
             --stack-name $StackName \
             --template-body file://./.circleci/files/cloudfront.yml \
-            --parameter ParameterKey=WorkflowID,ParameterValue=${CIRCLE_WORKFLOW_ID:0:7} \
+            --parameter ParameterKey=WorkflowID,ParameterValue=udapeople-${CIRCLE_WORKFLOW_ID:0:7} \
             --tags Key=Name,Value=Udapeople-production-${CIRCLE_WORKFLOW_ID:0:7}
       - persist_to_workspace:
           root: .circleci/ansible/
@@ -458,8 +458,8 @@ jobs:
             echo $originalWorkflowID
             if [ -n "$originalWorkflowID" ]
             then
-              aws s3 rm s3://udapeople-$originalWorkflowID --recursive
-              aws s3 rb s3://udapeople-$originalWorkflowID --force
+              aws s3 rm s3://$originalWorkflowID --recursive
+              aws s3 rb s3://$originalWorkflowID --force
               aws cloudformation delete-stack --stack-name udapeople-frontend-$originalWorkflowID
               aws cloudformation delete-stack --stack-name udapeople-backend-$originalWorkflowID
             else
