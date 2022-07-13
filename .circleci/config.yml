@@ -1,6 +1,6 @@
 version: 2.1
 
-	commands:
+commands:
   destroy-environment:
     description: Destroy frontend and backendcloudformation stacks as well as delete s3 bucket files
     steps:
@@ -232,8 +232,7 @@ jobs:
             cd .circleci/ansible
             ansible-playbook -i inventory.txt configure-server.yml
       # Here's where you will add some code to rollback on failure      
-      - destroy-environment:
-          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"  
+      - destroy-environment
   run-migrations:
     docker:
       - image: circleci/node:13.8.0
@@ -305,10 +304,8 @@ jobs:
             npm install
             npm run build
             aws s3 cp ./dist s3://udapeople-"${CIRCLE_WORKFLOW_ID:0:7}" --recursive
-      - revert-migrations:
-          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
-      - destroy-environment:
-          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
+      - revert-migrations
+      - destroy-environment
       # Here's where you will add some code to rollback on failure      
                     
   deploy-backend:
@@ -429,10 +426,8 @@ jobs:
           root: .circleci/ansible/
           paths:
             - originalWorkflowID.txt
-      - revert-migrations:
-          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
-      - destroy-environment:
-          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
+      - revert-migrations
+      - destroy-environment 
   cleanup:
     docker:
       - image: amazon/aws-cli
