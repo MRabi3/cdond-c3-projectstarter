@@ -331,9 +331,15 @@ jobs:
             apk add --update curl
             apk add --update openssh-client
       - run:
+          name: Get Current Path 
+          command: |
+            cd ./backend
+            pwd
+      - run:
           name: Set Enviroment variables 
           command: |
-            cd ./backend 
+            cd ./backend
+            pwd 
             touch .env
             echo ENVIROMENT=$ENVIROMENT >> ./.env
             echo TYPEORM_CONNECTION=$TYPEORM_CONNECTION >> ./.env
