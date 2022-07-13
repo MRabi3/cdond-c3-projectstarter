@@ -8,6 +8,8 @@
 
   - name: Install Node
     shell: |
+      sudo apt update
+      sudo apt install nodejs npm
       node --version
       npm --version      
 
@@ -23,7 +25,7 @@
   - name: Copy backend dist files web server
     copy:
       src: /root/project/backend
-      dest: /home/ubuntu
+      dest: /home/ubuntu/
       remote_src: yes
       directory_mode: yes
 
