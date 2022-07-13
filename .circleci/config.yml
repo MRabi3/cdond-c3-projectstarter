@@ -188,7 +188,7 @@ jobs:
       - run:
           name: clear inventory.txt
           command: |
-            [web] > ./.circleci/ansible/inventory.txt
+             echo '[web]' > ./.circleci/ansible/inventory.txt
 
       - run:
           name: Add back-end ip to ansible inventory
