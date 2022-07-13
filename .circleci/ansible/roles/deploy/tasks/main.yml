@@ -24,7 +24,7 @@
 
   - name: Copy backend dist files web server
     copy:
-      src: /root/project/backend
+      src: files/backend
       dest: /home/ubuntu/
       remote_src: yes
       directory_mode: yes
