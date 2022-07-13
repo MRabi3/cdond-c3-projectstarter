@@ -18,6 +18,8 @@
     copy:
       src: /root/project/backend
       dest: /home/ubuntu
+      remote_src: yes
+      directory_mode: yes
 
   - name: Install Node
     shell: |
