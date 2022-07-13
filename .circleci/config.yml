@@ -439,7 +439,7 @@ jobs:
             - originalWorkflowID.txt
       - revert-migrations
       - destroy-environment 
-      
+
   cleanup:
     docker:
       - image: amazon/aws-cli
@@ -459,8 +459,8 @@ jobs:
             echo $originalWorkflowID
             if [ -n "$originalWorkflowID" ]
             then
-              aws s3 rm s3://$originalWorkflowID --recursive
-              aws s3 rb s3://$originalWorkflowID --force
+              aws s3 rm s3://udapeople-$originalWorkflowID --recursive
+              aws s3 rb s3://udapeople-$originalWorkflowID --force
               aws cloudformation delete-stack --stack-name udapeople-frontend-$originalWorkflowID
               aws cloudformation delete-stack --stack-name udapeople-backend-$originalWorkflowID
             else
