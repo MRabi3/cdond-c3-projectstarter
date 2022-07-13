@@ -1,41 +1,57 @@
 version: 2.1
 
-commands:
+	commands:
   destroy-environment:
-    description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
-    parameters:
-      workflow_id:
-        type: string
+    description: Destroy frontend and backendcloudformation stacks as well as delete s3 bucket files
     steps:
       - run:
-          name: Destroy environments
+          name: Install AWS CLI
           when: on_fail
           command: |
-            echo "Destroying environment: <<parameters.workflow_id>> "
-            aws cloudformation delete-stack --stack-name UdaPeople-<<parameters.workflow_id>>
-            aws s3 rm s3://UdaPeople-<<parameters.workflow_id>> --recursive
-            aws cloudformation delete-stack --stack-name UdaPeople-<<parameters.workflow_id>>
-
-
-  revert-migrations:
-    description: Revert the last migration if successfully run in the current workflow.
-    parameters:
-      workflow_id:
-        type: string 
-    steps:
-      - run:
-          name: Revert migrations
-          when: on_fail
-          command: |
-            # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-            $SUCCESS = curl https://kvdb.io/FsGnCAbkTAfD27QTDD1KgX/migration_${workflow_id}
-            if(( $SUCCESS==1 )); 
-            then
-             cd ~/project/backend
-             npm install
-             npm run migrations:revert
+            if ! [ -x "$(command -v aws)" ]; then
+            pip install awscli
+            else
+            echo "AWS CLI already installed"
             fi
-            
+      - run:
+          name: Remove S3 files
+          when: on_fail
+          command: |
+            aws s3 rm s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} \
+            --recursive
+      - run:
+          name: Delete S3 bucket
+          when: on_fail
+          command: |
+            aws s3 rb s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} \
+            --force
+      - run:
+          name: Delete frontend stack
+          when: on_fail
+          command: |
+            aws cloudformation delete-stack \
+            --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
+      - run:
+          name: Delete backend stack
+          when: on_fail
+          command: |
+            aws cloudformation delete-stack \
+            --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
+  revert-migrations:
+    description: Revert the last migration if successfully run in the current workflow. 
+    steps:
+      - run:
+          name: Revert database migrations
+          command: |
+            migrationSuccess=$(curl -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" \
+            --request GET https://api.memstash.io/values/migration_status_${CIRCLE_WORKFLOW_ID})          
+            if [[ $migrationSuccess==1 ]]
+            then
+              cd /home/circleci/project/backend
+              npm install
+              npm run migrations:revert
+            fi
+          when: on_fail            
 jobs:
   build-frontend:
     docker:
@@ -192,8 +208,7 @@ jobs:
           paths:
             - inventory.txt
             - IP.txt
-      - destroy-environment:
-          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"    
+      - destroy-environment 
 
   configure-infrastructure: 
     docker:
@@ -254,8 +269,7 @@ jobs:
             then
                 curl https://kvdb.io/FsGnCAbkTAfD27QTDD1KgX/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
-      - revert-migrations:
-          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
+      - revert-migrations
       
      # Here's where you will add some code to rollback on failure      
 
@@ -334,10 +348,8 @@ jobs:
           command: |
             cd ./.circleci/ansible
             ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory.txt deploy-backend.yml
-      - revert-migrations:
-          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
-      - destroy-environment:
-          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
+      - revert-migrations
+      - destroy-environment
 
 
   smoke-test:
@@ -372,10 +384,8 @@ jobs:
             else
               return 0
             fi
-      - revert-migrations:
-          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
-      - destroy-environment:
-          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
+      - revert-migrations
+      - destroy-environment
 
   cloudfront-update:
     docker:
@@ -449,10 +459,8 @@ jobs:
             else
               echo "No old workflow exists"
             fi 
-      - revert-migrations:
-          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
-      - destroy-environment:
-          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
+      - revert-migrations
+      - destroy-environment
             
 
 workflows:
