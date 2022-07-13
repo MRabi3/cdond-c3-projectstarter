@@ -16,7 +16,7 @@
 
 - name: Copy backend dist files web server
   copy:
-    src: ./backend
+    src: ../../backend
     dest: /home/ubuntu/backend
 
 - name: Install Node

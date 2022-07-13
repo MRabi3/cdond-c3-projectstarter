@@ -205,14 +205,14 @@ jobs:
             aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --filters "Name=tag:project,Values=udapeople" \
-            --output text > ./.circleci/ansible/IP.txt
-            cat ./.circleci/ansible/IP.txt
+            --output text > ./.circleci/ansible/MyIP.txt
+            cat ./.circleci/ansible/MyIP.txt
 
       - persist_to_workspace:
           root: .circleci/ansible/
           paths:
             - inventory.txt
-            - IP.txt
+            - MyIP.txt
       - destroy-environment 
 
   configure-infrastructure: 
@@ -295,7 +295,7 @@ jobs:
       - run:
           name: Get backend url
           command: |
-            backendIP=`cat ./.circleci/ansible/IP.txt`
+            backendIP=`cat ./.circleci/ansible/MyIP.txt`
             export API_URL="http://${backendIP}:3030"
             cd ./frontend
             touch ./.env
@@ -370,7 +370,7 @@ jobs:
       - run:
           name: Get Backend IP and Backend smoke test.
           command: |
-            backendIP=`cat ./.circleci/ansible/IP.txt`
+            backendIP=`cat ./.circleci/ansible/MyIP.txt`
             echo $backendIP
             sleep 20
             URL="http://$backendIP:3030/api/status"
