@@ -296,7 +296,7 @@ jobs:
           name: Get backend url
           command: |
             backendIP=`cat ./.circleci/ansible/MyIP.txt`
-            export API_URL="http://www.autosuperpower.tech:3030/"
+            export API_URL="http://${backendIP}:3030"
             cd ./frontend
             touch ./.env
             echo API_URL=$API_URL >> ./.env
@@ -466,8 +466,8 @@ jobs:
             else
               echo "No old workflow exists"
             fi 
-      - revert-migrations
-      - destroy-environment
+      # - revert-migrations
+      # - destroy-environment
             
 
 workflows:
@@ -500,5 +500,5 @@ workflows:
           requires: [deploy-backend, deploy-frontend]
       - cloudfront-update:
           requires: [smoke-test]
-      # - cleanup:
-      #     requires: [cloudfront-update]
+      - cleanup:
+          requires: [cloudfront-update]
