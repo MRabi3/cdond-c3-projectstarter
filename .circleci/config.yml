@@ -430,6 +430,7 @@ jobs:
             fi
 
             if [["$originalWorkflowID" != "${CIRCLE_WORKFLOW_ID:0:7}"]]
+            then
             aws cloudformation $StackOption \
             --stack-name $StackName \
             --template-body file://./.circleci/files/cloudfront.yml \
