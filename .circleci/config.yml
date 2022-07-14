@@ -428,11 +428,14 @@ jobs:
               StackOption=create-stack
               StackName=udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
             fi
+
+            if [["$originalWorkflowID" != "${CIRCLE_WORKFLOW_ID:0:7}"]]
             aws cloudformation $StackOption \
             --stack-name $StackName \
             --template-body file://./.circleci/files/cloudfront.yml \
             --parameter ParameterKey=WorkflowID,ParameterValue=${CIRCLE_WORKFLOW_ID:0:7} \
             --tags Key=Name,Value=Udapeople-production-${CIRCLE_WORKFLOW_ID:0:7}
+             fi
       - persist_to_workspace:
           root: .circleci/ansible/
           paths:
@@ -457,7 +460,7 @@ jobs:
           command: |
             originalWorkflowID=`cat ./.circleci/ansible/originalWorkflowID.txt`
             echo $originalWorkflowID
-            if [ -n "$originalWorkflowID" ]
+            if [[ -n "$originalWorkflowID" && "$originalWorkflowID" != "${CIRCLE_WORKFLOW_ID:0:7}""]]
             then
               aws s3 rm s3://udapeople-$originalWorkflowID --recursive
               aws s3 rb s3://udapeople-$originalWorkflowID --force
@@ -466,8 +469,8 @@ jobs:
             else
               echo "No old workflow exists"
             fi 
-      # - revert-migrations
-      # - destroy-environment
+      - revert-migrations
+      - destroy-environment
             
 
 workflows:
