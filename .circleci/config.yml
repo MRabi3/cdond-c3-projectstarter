@@ -204,7 +204,7 @@ jobs:
           command: |
             aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
-            --filters "Name=tag:project,Values=udapeople" \
+            --filters "Name=tag:Name,Values=backend_${CIRCLE_WORKFLOW_ID:0:7}" \
             --output text > ./.circleci/ansible/MyIP.txt
             cat ./.circleci/ansible/MyIP.txt
 
@@ -423,10 +423,10 @@ jobs:
             then
               echo $originalWorkflowID
               StackOption=update-stack
-              StackName=udapeople-frontend-$originalWorkflowID
+              StackName=udapeople-$originalWorkflowID
             else
               StackOption=create-stack
-              StackName=udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
+              StackName=udapeople-${CIRCLE_WORKFLOW_ID:0:7}
             fi
             aws cloudformation $StackOption \
             --stack-name $StackName \
